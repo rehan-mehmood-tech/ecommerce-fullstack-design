@@ -15,11 +15,28 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: resolve(__dirname, '.env') });
 await connectDB();
+// Load Firebase Admin service account (file path OR inline JSON env var)
+let serviceAccount = null;
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-if (serviceAccountPath) {
+const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+if (serviceAccountRaw) {
+  try {
+    serviceAccount = JSON.parse(serviceAccountRaw);
+  } catch (err) {
+    console.warn('Failed to parse FIREBASE_SERVICE_ACCOUNT env var:', err.message);
+  }
+} else if (serviceAccountPath) {
   try {
     const fullPath = resolve(__dirname, serviceAccountPath);
-    const serviceAccount = JSON.parse(readFileSync(fullPath, 'utf8'));
+    serviceAccount = JSON.parse(readFileSync(fullPath, 'utf8'));
+  } catch (err) {
+    console.warn('Failed to read service account file:', err.message);
+  }
+}
+
+if (serviceAccount) {
+  try {
     admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
     console.log('Firebase Admin initialized');
   } catch (err) {
