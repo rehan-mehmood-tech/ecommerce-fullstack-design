@@ -19,9 +19,6 @@ yarn-error.log*
 logs/
 *.log
 
-# Firebase Admin service account (contains secrets)
-config/firebase-service-account.json
-
 # OS files
 .DS_Store
 Thumbs.db
