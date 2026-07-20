@@ -6,7 +6,6 @@ import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import admin from 'firebase-admin';
-import connectDB from './config/db.js';
 import Product from './models/Product.js';
 import productRoutes from './routes/productRoutes.js';
 
@@ -14,8 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config({ path: resolve(__dirname, '.env') });
-await connectDB();
-// Load Firebase Admin service account (file path OR inline JSON env var)
+
 let serviceAccount = null;
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -52,7 +50,6 @@ app.use(express.json());
 
 app.use('/api/products', productRoutes);
 
-// Auto-seed if empty
 const count = await Product.countDocuments();
 if (count === 0) {
   const { default: products } = await import('./seedData.js');

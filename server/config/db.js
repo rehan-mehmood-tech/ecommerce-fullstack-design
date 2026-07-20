@@ -1,28 +1,10 @@
-import mongoose from 'mongoose';
+import admin from 'firebase-admin';
 
-const connectDB = async () => {
-  // Try real MongoDB first
-  try {
-    await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 3000 });
-    console.log('MongoDB Connected');
-    return;
-  } catch (err) {
-    console.warn('MongoDB connection failed:', err.message);
-    console.log('Starting in-memory MongoDB...');
+const getDb = () => {
+  if (!admin.apps.length) {
+    throw new Error('Firebase Admin not initialized. Call admin.initializeApp() first.');
   }
-
-  // Fallback to mongodb-memory-server
-  try {
-    const { MongoMemoryServer } = await import('mongodb-memory-server');
-    const mongod = await MongoMemoryServer.create();
-    const uri = mongod.getUri();
-    process.env.MONGO_URI = uri;
-    await mongoose.connect(uri);
-    console.log('MongoDB Memory Server Connected');
-  } catch (memErr) {
-    console.error('Failed to start MongoDB Memory Server:', memErr.message);
-    process.exit(1);
-  }
+  return admin.firestore();
 };
 
-export default connectDB;
+export default getDb;
